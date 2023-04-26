@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">MVVMTodo</string>
+    <string name="fab_addTask">add a new task</string>
+    <string name="textView_contentDescription_priority">text of the task</string>
+    <string name="fab_contentDescription_save_task">save task</string>
+    <string name="editText_hint_taskName">Task name</string>
 </resources>
