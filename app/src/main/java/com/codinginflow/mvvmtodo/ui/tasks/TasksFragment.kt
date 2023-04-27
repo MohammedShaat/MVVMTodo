@@ -51,6 +51,7 @@ class TasksFragment : Fragment(R.layout.fragment_tasks) {
         return when (item.itemId) {
             R.id.hide_completed_tasks -> {
                 item.isChecked = !item.isChecked
+                viewModel.hideCompleted.value = item.isChecked
                 true
             }
 
@@ -59,11 +60,12 @@ class TasksFragment : Fragment(R.layout.fragment_tasks) {
             }
 
             R.id.sort_tasks_by_name -> {
+                viewModel.sortOrder.value = SortOrder.BY_NAME
                 true
             }
 
             R.id.sort_tasks_by_date_created -> {
-
+                viewModel.sortOrder.value = SortOrder.BY_DATE_CREATED
                 true
             }
 
