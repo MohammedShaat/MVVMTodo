@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.codinginflow.mvvmtodo.data.Task
 import com.codinginflow.mvvmtodo.databinding.ItemTaskBinding
+import kotlinx.android.synthetic.main.item_task.view.*
 
 class TasksAdapter : ListAdapter<Task, TasksAdapter.TaskViewHolder>(TaskCallBack()) {
 

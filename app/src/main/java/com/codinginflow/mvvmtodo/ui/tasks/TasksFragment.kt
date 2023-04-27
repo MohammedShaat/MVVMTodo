@@ -1,13 +1,17 @@
 package com.codinginflow.mvvmtodo.ui.tasks
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
-import android.widget.LinearLayout
+import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.codinginflow.mvvmtodo.R
 import com.codinginflow.mvvmtodo.databinding.FragmentTasksBinding
+import com.codinginflow.mvvmtodo.util.onQueryTextChange
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -29,6 +33,41 @@ class TasksFragment : Fragment(R.layout.fragment_tasks) {
 
         viewModel.tasks.observe(viewLifecycleOwner) { listTasks ->
             tasksAdapter.submitList(listTasks)
+        }
+
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_fragment_tasks, menu)
+
+        val searchView = menu.findItem(R.id.search).actionView as SearchView
+        searchView.onQueryTextChange {
+            viewModel.searchQuery.value = it
+        }
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.hide_completed_tasks -> {
+                item.isChecked = !item.isChecked
+                true
+            }
+
+            R.id.delete_all_tasks -> {
+                true
+            }
+
+            R.id.sort_tasks_by_name -> {
+                true
+            }
+
+            R.id.sort_tasks_by_date_created -> {
+
+                true
+            }
+
+            else -> super.onOptionsItemSelected(item)
         }
     }
 }
