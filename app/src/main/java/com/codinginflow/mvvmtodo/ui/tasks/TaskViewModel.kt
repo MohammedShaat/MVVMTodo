@@ -3,28 +3,47 @@ package com.codinginflow.mvvmtodo.ui.tasks
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.viewModelScope
+import com.codinginflow.mvvmtodo.data.PreferencesManager
 import com.codinginflow.mvvmtodo.data.TaskDao
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.launch
 
 class TaskViewModel @ViewModelInject constructor(
-    private val taskDao: TaskDao
+    private val taskDao: TaskDao,
+    private val preferencesManager: PreferencesManager
 ) : ViewModel() {
 
     val searchQuery = MutableStateFlow("")
-    val sortOrder = MutableStateFlow(SortOrder.BY_DATE_CREATED)
-    val hideCompleted = MutableStateFlow(false)
+    val preferencesFilterFlow = preferencesManager.preferencesFilterFlow
 
     private val tasksFlow =
-        combine(searchQuery, sortOrder, hideCompleted) { searchQuery, sortOrder, hideCompleted ->
-            Triple(searchQuery, sortOrder, hideCompleted)
+        combine(searchQuery, preferencesFilterFlow) { searchQuery, preferencesFilterFlow ->
+            Pair(searchQuery, preferencesFilterFlow)
         }
-            .flatMapLatest { (searchQuery, sortOrder, hideCompleted) ->
-                taskDao.getTasks(searchQuery, sortOrder, hideCompleted)
+            .flatMapLatest { (searchQuery, preferencesFilterFlow) ->
+                taskDao.getTasks(
+                    searchQuery,
+                    preferencesFilterFlow.sortOrder,
+                    preferencesFilterFlow.hideCompleted
+                )
             }
 
     val tasks = tasksFlow.asLiveData()
+
+    fun onSortOrderSelected(sortOrder: SortOrder) {
+        viewModelScope.launch {
+            preferencesManager.updateSortOrder(sortOrder)
+        }
+    }
+
+    fun onHideCompletedClicked(hideCompleted: Boolean) {
+        viewModelScope.launch {
+            preferencesManager.updateHideCompleted(hideCompleted)
+        }
+    }
 }
 
 enum class SortOrder(column: String) {
