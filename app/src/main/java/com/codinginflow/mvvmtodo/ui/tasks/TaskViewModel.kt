@@ -7,9 +7,11 @@ import androidx.lifecycle.viewModelScope
 import com.codinginflow.mvvmtodo.data.PreferencesManager
 import com.codinginflow.mvvmtodo.data.Task
 import com.codinginflow.mvvmtodo.data.TaskDao
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class TaskViewModel @ViewModelInject constructor(
@@ -19,6 +21,9 @@ class TaskViewModel @ViewModelInject constructor(
 
     val searchQuery = MutableStateFlow("")
     val preferencesFilterFlow = preferencesManager.preferencesFilterFlow
+
+    private val taskEventChannel = Channel<TaskEvent>()
+    val taskEvent = taskEventChannel.receiveAsFlow()
 
     private val tasksFlow =
         combine(searchQuery, preferencesFilterFlow) { searchQuery, preferencesFilterFlow ->
@@ -55,8 +60,25 @@ class TaskViewModel @ViewModelInject constructor(
             taskDao.update(task.copy(completed = checked))
         }
     }
+
+    fun onTaskSwiped(task: Task) {
+        viewModelScope.launch {
+            taskDao.delete(task)
+            taskEventChannel.send(TaskEvent.ShowUnDoDeleteTaskMessage(task))
+        }
+    }
+
+    fun onUndoDeleteClick(task: Task) {
+        viewModelScope.launch {
+            taskDao.insert(task)
+        }
+    }
 }
 
 enum class SortOrder(column: String) {
     BY_NAME("name"), BY_DATE_CREATED("created")
+}
+
+sealed class TaskEvent {
+    data class ShowUnDoDeleteTaskMessage(val task: Task) : TaskEvent()
 }
