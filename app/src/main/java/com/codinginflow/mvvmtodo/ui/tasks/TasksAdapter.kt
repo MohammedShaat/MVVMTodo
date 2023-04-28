@@ -10,26 +10,37 @@ import com.codinginflow.mvvmtodo.data.Task
 import com.codinginflow.mvvmtodo.databinding.ItemTaskBinding
 import kotlinx.android.synthetic.main.item_task.view.*
 
-class TasksAdapter : ListAdapter<Task, TasksAdapter.TaskViewHolder>(TaskCallBack()) {
+class TasksAdapter(private val listener: OnItemClickListener) :
+    ListAdapter<Task, TasksAdapter.TaskViewHolder>(TaskCallBack()) {
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
-        return TaskViewHolder.create(parent)
+        val binding = ItemTaskBinding.inflate(
+            LayoutInflater.from(parent.context), parent, false
+        )
+        return TaskViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: TaskViewHolder, position: Int) {
         holder.bind(getItem(position))
     }
 
-    class TaskViewHolder private constructor(private val binding: ItemTaskBinding) :
+    inner class TaskViewHolder constructor(private val binding: ItemTaskBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        companion object {
-            fun create(parent: ViewGroup): TaskViewHolder {
-                val binding = ItemTaskBinding.inflate(
-                    LayoutInflater.from(parent.context), parent, false
-                )
-                return TaskViewHolder(binding)
+        init {
+            binding.apply {
+                root.setOnClickListener {
+                    if (adapterPosition != RecyclerView.NO_POSITION) {
+                        listener.onItemClick(getItem(adapterPosition))
+                    }
+                }
+
+                checkBoxCompleteTask.setOnClickListener {
+                    if (adapterPosition != RecyclerView.NO_POSITION) {
+                        listener.onCheckBoxClick(getItem(adapterPosition), checkBoxCompleteTask.isChecked)
+                    }
+                }
             }
         }
 
@@ -51,5 +62,10 @@ class TasksAdapter : ListAdapter<Task, TasksAdapter.TaskViewHolder>(TaskCallBack
         override fun areContentsTheSame(oldItem: Task, newItem: Task): Boolean {
             return oldItem == newItem
         }
+    }
+
+    interface OnItemClickListener {
+        fun onItemClick(task: Task)
+        fun onCheckBoxClick(task: Task, isChecked: Boolean)
     }
 }
