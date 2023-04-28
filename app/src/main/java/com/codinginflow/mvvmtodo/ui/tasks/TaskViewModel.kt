@@ -1,9 +1,8 @@
 package com.codinginflow.mvvmtodo.ui.tasks
 
+import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.codinginflow.mvvmtodo.data.PreferencesManager
 import com.codinginflow.mvvmtodo.data.Task
 import com.codinginflow.mvvmtodo.data.TaskDao
@@ -16,17 +15,18 @@ import kotlinx.coroutines.launch
 
 class TaskViewModel @ViewModelInject constructor(
     private val taskDao: TaskDao,
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
+    @Assisted private val state: SavedStateHandle
 ) : ViewModel() {
 
-    val searchQuery = MutableStateFlow("")
+    val searchQuery = state.getLiveData("searchQuery", "")
     val preferencesFilterFlow = preferencesManager.preferencesFilterFlow
 
     private val taskEventChannel = Channel<TaskEvent>()
     val taskEvent = taskEventChannel.receiveAsFlow()
 
     private val tasksFlow =
-        combine(searchQuery, preferencesFilterFlow) { searchQuery, preferencesFilterFlow ->
+        combine(searchQuery.asFlow(), preferencesFilterFlow) { searchQuery, preferencesFilterFlow ->
             Pair(searchQuery, preferencesFilterFlow)
         }
             .flatMapLatest { (searchQuery, preferencesFilterFlow) ->
@@ -52,7 +52,9 @@ class TaskViewModel @ViewModelInject constructor(
     }
 
     fun onTaskClick(task: Task) {
-        TODO("Not yet implemented")
+        viewModelScope.launch {
+            taskEventChannel.send(TaskEvent.NavigateToAddEditTaskFragmentWithTaskArg(task))
+        }
     }
 
     fun onCheckBoxTaskClick(task: Task, checked: Boolean) {
@@ -64,13 +66,19 @@ class TaskViewModel @ViewModelInject constructor(
     fun onTaskSwiped(task: Task) {
         viewModelScope.launch {
             taskDao.delete(task)
-            taskEventChannel.send(TaskEvent.ShowUnDoDeleteTaskMessage(task))
+            taskEventChannel.send(TaskEvent.ShowUndoDeleteTaskMessage(task))
         }
     }
 
     fun onUndoDeleteClick(task: Task) {
         viewModelScope.launch {
             taskDao.insert(task)
+        }
+    }
+
+    fun onFabAddTaskClick() {
+        viewModelScope.launch {
+            taskEventChannel.send(TaskEvent.NavigateToAddEditTaskFragment)
         }
     }
 }
@@ -80,5 +88,7 @@ enum class SortOrder(column: String) {
 }
 
 sealed class TaskEvent {
-    data class ShowUnDoDeleteTaskMessage(val task: Task) : TaskEvent()
+    data class ShowUndoDeleteTaskMessage(val task: Task) : TaskEvent()
+    data class NavigateToAddEditTaskFragmentWithTaskArg(val task: Task) : TaskEvent()
+    object NavigateToAddEditTaskFragment : TaskEvent()
 }
