@@ -12,4 +12,6 @@
     <string name="item_title_search">Search</string>
     <string name="textView_text_createDate">Created: %s</string>
     <string name="checkBox_text_important">Important task</string>
+    <string name="new_task_message">New task has been added successfully</string>
+    <string name="update_task_message">Task has been updated successfully</string>
 </resources>

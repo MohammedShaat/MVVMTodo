@@ -3,11 +3,13 @@ package com.codinginflow.mvvmtodo.ui.tasks
 import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.*
+import com.codinginflow.mvvmtodo.R
 import com.codinginflow.mvvmtodo.data.PreferencesManager
 import com.codinginflow.mvvmtodo.data.Task
 import com.codinginflow.mvvmtodo.data.TaskDao
+import com.codinginflow.mvvmtodo.ui.ADD_TASK_RESULT_OK
+import com.codinginflow.mvvmtodo.ui.EDIT_TASK_RESULT_OK
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -81,6 +83,17 @@ class TaskViewModel @ViewModelInject constructor(
             taskEventChannel.send(TaskEvent.NavigateToAddEditTaskFragment)
         }
     }
+
+    fun onAddEditTaskResult(result: Int) = viewModelScope.launch {
+        when (result) {
+            ADD_TASK_RESULT_OK -> taskEventChannel.send(
+                TaskEvent.ShowTaskSavedAfterEditOrAddMessage(R.string.new_task_message)
+            )
+            EDIT_TASK_RESULT_OK -> taskEventChannel.send(
+                TaskEvent.ShowTaskSavedAfterEditOrAddMessage(R.string.update_task_message)
+            )
+        }
+    }
 }
 
 enum class SortOrder(column: String) {
@@ -91,4 +104,5 @@ sealed class TaskEvent {
     data class ShowUndoDeleteTaskMessage(val task: Task) : TaskEvent()
     data class NavigateToAddEditTaskFragmentWithTaskArg(val task: Task) : TaskEvent()
     object NavigateToAddEditTaskFragment : TaskEvent()
+    data class ShowTaskSavedAfterEditOrAddMessage(val messageResId: Int) : TaskEvent()
 }

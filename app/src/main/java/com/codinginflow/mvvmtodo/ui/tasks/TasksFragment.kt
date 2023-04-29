@@ -7,6 +7,7 @@ import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResultListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -16,6 +17,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.codinginflow.mvvmtodo.R
 import com.codinginflow.mvvmtodo.data.Task
 import com.codinginflow.mvvmtodo.databinding.FragmentTasksBinding
+import com.codinginflow.mvvmtodo.ui.ADD_EDIT_RESULT_KEY
+import com.codinginflow.mvvmtodo.ui.ADD_EDIT_TASK_REQUEST_KEY
 import com.codinginflow.mvvmtodo.util.exhaustive
 import com.codinginflow.mvvmtodo.util.onQueryTextChange
 import com.google.android.material.snackbar.Snackbar
@@ -51,7 +54,6 @@ class TasksFragment : Fragment(R.layout.fragment_tasks), TasksAdapter.OnItemClic
             ): Boolean {
                 return false
             }
-
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val task = tasksAdapter.currentList[viewHolder.adapterPosition]
                 viewModel.onTaskSwiped(task)
@@ -90,10 +92,17 @@ class TasksFragment : Fragment(R.layout.fragment_tasks), TasksAdapter.OnItemClic
                         findNavController().navigate(action)
 
                     }
+                    is TaskEvent.ShowTaskSavedAfterEditOrAddMessage -> {
+                        Snackbar.make(view, getString(taskEvent.messageResId), Snackbar.LENGTH_SHORT).show()
+                    }
                 }.exhaustive
             }
         }
 
+        setFragmentResultListener(ADD_EDIT_TASK_REQUEST_KEY) { _, bundle ->
+            val result = bundle.getInt(ADD_EDIT_RESULT_KEY)
+            viewModel.onAddEditTaskResult(result)
+        }
 
         setHasOptionsMenu(true)
     }
