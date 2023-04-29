@@ -11,12 +11,14 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import javax.inject.Qualifier
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
     @Provides
+    @Singleton
     fun provideTaskDatabase(app: Application, callback: TaskDatabase.Callback): TaskDatabase {
         return Room.databaseBuilder(app, TaskDatabase::class.java, "task_database")
             .fallbackToDestructiveMigration()
@@ -31,6 +33,7 @@ object AppModule {
 
     @ApplicationCoroutine
     @Provides
+    @Singleton
     fun provideCoroutineScope(): CoroutineScope {
         return CoroutineScope(SupervisorJob())
     }
