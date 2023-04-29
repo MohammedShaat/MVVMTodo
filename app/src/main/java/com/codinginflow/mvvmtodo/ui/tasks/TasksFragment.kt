@@ -95,6 +95,10 @@ class TasksFragment : Fragment(R.layout.fragment_tasks), TasksAdapter.OnItemClic
                     is TaskEvent.ShowTaskSavedAfterEditOrAddMessage -> {
                         Snackbar.make(view, getString(taskEvent.messageResId), Snackbar.LENGTH_SHORT).show()
                     }
+                    TaskEvent.ShowDeleteAllCompletedTasksConfirmation -> {
+                        val action = TasksFragmentDirections.actionGlobalDeleteAllCompletedTasks()
+                        findNavController().navigate(action)
+                    }
                 }.exhaustive
             }
         }
@@ -138,6 +142,7 @@ class TasksFragment : Fragment(R.layout.fragment_tasks), TasksAdapter.OnItemClic
             }
 
             R.id.delete_all_tasks -> {
+                viewModel.onDeleteAllCompletedTasksClick()
                 true
             }
 

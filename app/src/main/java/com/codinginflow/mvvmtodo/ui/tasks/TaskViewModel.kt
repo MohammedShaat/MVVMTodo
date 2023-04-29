@@ -94,6 +94,10 @@ class TaskViewModel @ViewModelInject constructor(
             )
         }
     }
+
+    fun onDeleteAllCompletedTasksClick() = viewModelScope.launch {
+        taskEventChannel.send(TaskEvent.ShowDeleteAllCompletedTasksConfirmation)
+    }
 }
 
 enum class SortOrder(column: String) {
@@ -105,4 +109,5 @@ sealed class TaskEvent {
     data class NavigateToAddEditTaskFragmentWithTaskArg(val task: Task) : TaskEvent()
     object NavigateToAddEditTaskFragment : TaskEvent()
     data class ShowTaskSavedAfterEditOrAddMessage(val messageResId: Int) : TaskEvent()
+    object ShowDeleteAllCompletedTasksConfirmation: TaskEvent()
 }
