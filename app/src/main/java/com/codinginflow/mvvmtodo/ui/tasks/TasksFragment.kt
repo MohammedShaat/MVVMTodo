@@ -32,6 +32,7 @@ class TasksFragment : Fragment(R.layout.fragment_tasks), TasksAdapter.OnItemClic
 
     private val viewModel: TaskViewModel by viewModels()
     private lateinit var binding: FragmentTasksBinding
+    private lateinit var searchView: SearchView
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -122,7 +123,13 @@ class TasksFragment : Fragment(R.layout.fragment_tasks), TasksAdapter.OnItemClic
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_fragment_tasks, menu)
 
-        val searchView = menu.findItem(R.id.search).actionView as SearchView
+        val searchItem = menu.findItem(R.id.search)
+        searchView = searchItem.actionView as SearchView
+
+        if (viewModel.searchQuery.value != "") {
+            searchItem.expandActionView()
+            searchView.setQuery(viewModel.searchQuery.value, false)
+        }
         searchView.onQueryTextChange {
             viewModel.searchQuery.value = it
         }
@@ -158,5 +165,10 @@ class TasksFragment : Fragment(R.layout.fragment_tasks), TasksAdapter.OnItemClic
 
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        searchView.onQueryTextChange(null)
     }
 }
