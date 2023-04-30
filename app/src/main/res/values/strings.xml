@@ -5,7 +5,7 @@
     <string name="fab_contentDescription_save_task">save task</string>
     <string name="editText_hint_taskName">Task name</string>
     <string name="item_title_hide_completed_tasks">Hide completed tasks</string>
-    <string name="item_title_delete_completed_tasks">Delete all tasks</string>
+    <string name="item_title_delete_completed_tasks">Delete all completed tasks</string>
     <string name="item_title_sort">Sort tasks</string>
     <string name="item_title_sort_tasks_by_name">Sort by name</string>
     <string name="item_title_sort_by_date_created">Sort by date created</string>
